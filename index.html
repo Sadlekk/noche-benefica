@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Noche Benéfica en Wendy's</title>
+  <meta name="description" content="Estás invitado a nuestra Noche Benéfica en Wendy's. Aparta tu boleto y ayúdanos con los gastos médicos.">
+  <meta property="og:title" content="Noche Benéfica en Wendy's">
+  <meta property="og:description" content="Aparta tu boleto y ayúdanos con los gastos médicos. ¡Te esperamos!">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#B9261C">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500;1,9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <p id="aviso-demo" class="aviso-demo" hidden>
+    Modo de prueba: los registros no se están guardando en la hoja de Google (ver <code>google-apps-script/Code.gs</code>).
+  </p>
+
+  <!-- ===== Portada / invitación ===== -->
+  <header class="portada">
+    <div class="portada-in">
+      <p class="sobretitulo">Estás invitado</p>
+      <h1>Noche <em>Benéfica</em></h1>
+      <p class="portada-sub">
+        Una cena en Wendy's a beneficio de
+        <strong data-cfg="beneficiario"></strong>
+      </p>
+
+      <article class="boleto" aria-label="Detalles del evento">
+        <dl class="boleto-datos">
+          <div id="bloque-fecha">
+            <dt>Fecha</dt>
+            <dd data-cfg="fechaTexto"></dd>
+          </div>
+          <div id="bloque-hora">
+            <dt>Hora</dt>
+            <dd data-cfg="horaTexto"></dd>
+          </div>
+          <div class="ancho">
+            <dt>Lugar</dt>
+            <dd>
+              <span data-cfg="lugar"></span>
+              <a id="enlace-mapa" class="enlace-mapa" target="_blank" rel="noopener" hidden>Ver mapa</a>
+            </dd>
+          </div>
+        </dl>
+        <div class="boleto-talon">
+          <span class="talon-etiqueta">Boleto</span>
+          <span class="talon-precio" data-cfg="precioBoleto"></span>
+          <span class="talon-nota" data-cfg="incluye"></span>
+        </div>
+      </article>
+
+      <div id="cuenta" class="cuenta" aria-live="off">
+        <div><b id="c-dias">--</b><span>días</span></div>
+        <div><b id="c-horas">--</b><span>horas</span></div>
+        <div><b id="c-min">--</b><span>min</span></div>
+        <div><b id="c-seg">--</b><span>seg</span></div>
+      </div>
+      <p id="cuenta-msg" class="cuenta-msg" hidden></p>
+
+      <a class="boton boton-claro" href="#registro">Apartar mi boleto</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== La causa ===== -->
+    <section class="seccion causa">
+      <h2>Por qué nos reunimos</h2>
+      <p class="causa-texto" data-cfg="mensaje"></p>
+    </section>
+
+    <!-- ===== Cómo funciona ===== -->
+    <section class="seccion">
+      <h2>Cómo funciona</h2>
+      <ol class="pasos">
+        <li>
+          <h3>Anótate</h3>
+          <p>Escribe tu nombre aquí abajo para apartar tu boleto.</p>
+        </li>
+        <li>
+          <h3>Compra tu boleto</h3>
+          <p data-cfg="comoPagar"></p>
+        </li>
+        <li>
+          <h3>Ven a cenar</h3>
+          <p>Disfruta tu combo el día del evento. Lo recaudado va para los gastos médicos.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===== Avance de boletos (solo cantidades, sin nombres) ===== -->
+    <section class="seccion" id="avance" hidden>
+      <h2>Boletos apartados</h2>
+      <p class="avance-cifra"><b id="avance-num">0</b> de <span id="avance-total"></span> boletos</p>
+      <div class="avance-barra" role="progressbar" aria-labelledby="avance-texto" aria-valuemin="0" aria-valuemax="100" id="avance-barra">
+        <span id="avance-relleno"></span>
+      </div>
+      <p id="avance-texto" class="avance-texto"></p>
+    </section>
+
+    <!-- ===== Registro ===== -->
+    <section class="seccion" id="registro">
+      <div class="tarjeta">
+        <form id="form-registro" novalidate>
+          <h2>Aparta tu boleto</h2>
+          <p class="ayuda">Solo necesitamos tu nombre para saber quién va a comprar boleto.</p>
+
+          <label for="nombre">Nombre y apellido</label>
+          <input id="nombre" name="nombre" type="text" autocomplete="name" maxlength="80" placeholder="Ej. María Pérez" required>
+
+          <!-- Trampa para bots: debe quedarse vacío -->
+          <input class="oculto" type="text" name="sitio" id="sitio" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <label for="boletos">¿Cuántos boletos?</label>
+          <div class="contador">
+            <button type="button" id="menos" aria-label="Quitar un boleto">−</button>
+            <input id="boletos" name="boletos" type="number" inputmode="numeric" min="1" max="20" value="1" required>
+            <button type="button" id="mas" aria-label="Agregar un boleto">+</button>
+          </div>
+
+          <p id="form-error" class="form-error" role="alert" hidden></p>
+          <button class="boton" type="submit" id="enviar">Apartar boleto</button>
+        </form>
+
+        <div id="gracias" class="gracias" hidden tabindex="-1">
+          <p class="gracias-marca" aria-hidden="true">✓</p>
+          <h2>¡Gracias, <span id="gracias-nombre"></span>!</h2>
+          <p id="gracias-detalle"></p>
+          <p class="ayuda" data-cfg="comoPagar"></p>
+          <button class="boton boton-linea" type="button" id="otro">Anotar a otra persona</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Compartir ===== -->
+    <section class="seccion compartir">
+      <h2>Corre la voz</h2>
+      <p>Mientras más seamos, más ayudamos.</p>
+      <div class="compartir-botones">
+        <button class="boton" type="button" id="compartir">Compartir invitación</button>
+        <a class="boton boton-linea" id="whatsapp" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Evento organizado por familiares y amigos de <span data-cfg="beneficiario"></span>.</p>
+    <p class="pie-legal">Wendy's es una marca registrada de su respectivo propietario. Esta página es de los organizadores del evento y no un sitio oficial de la marca.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
