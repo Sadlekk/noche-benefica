@@ -1,5 +1,6 @@
 :root {
   --rojo: #b9261c;
+  --rojo-claro: #d23a2c;
   --rojo-osc: #8c1911;
   --crema: #fbf2e3;
   --papel: #fffaf1;
@@ -8,8 +9,11 @@
   --linea: #e7d7bd;
   --mostaza: #f2b632;
   --verde: #2f7d4f;
-  --titulos: "Fraunces", Georgia, "Times New Roman", serif;
-  --texto: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Gotham es una tipografía de pago y no se puede cargar desde Google Fonts.
+     Montserrat es la alternativa gratuita más parecida. Para usar Gotham real
+     hay que agregar sus archivos en una carpeta fonts/ y declararlos con
+     @font-face; entonces basta poner "Gotham" al inicio de esta lista. */
+  --fuente: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 
@@ -25,14 +29,14 @@ body {
   margin: 0;
   background: var(--crema);
   color: var(--tinta);
-  font-family: var(--texto);
-  font-size: 1.0625rem;
-  line-height: 1.55;
+  font-family: var(--fuente);
+  font-size: 1rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
-  font-family: var(--titulos);
+  font-family: var(--fuente);
   line-height: 1.1;
   margin: 0;
   text-wrap: balance;
@@ -41,6 +45,8 @@ h1, h2, h3 {
 p { margin: 0; }
 
 a { color: inherit; }
+
+button, input { font-family: inherit; }
 
 :focus-visible {
   outline: 3px solid var(--mostaza);
@@ -67,9 +73,14 @@ a { color: inherit; }
 
 /* ===== Portada ===== */
 .portada {
-  background: var(--rojo);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 85% 55% at 50% 0%, var(--rojo-claro), transparent 72%),
+    linear-gradient(180deg, var(--rojo) 35%, #a21e15 100%);
   color: var(--papel);
-  padding: 3.5rem 1.25rem 4rem;
+  padding: 0 1.25rem 3.75rem;
   text-align: center;
 }
 
@@ -78,47 +89,220 @@ a { color: inherit; }
   margin: 0 auto;
 }
 
+/* Entrada escalonada del contenido */
+.portada-in > * {
+  animation: entrar 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.portada-in > :nth-child(2) { animation-delay: 0.1s; }
+.portada-in > :nth-child(3) { animation-delay: 0.18s; }
+.portada-in > :nth-child(4) { animation-delay: 0.26s; }
+.portada-in > :nth-child(5) { animation-delay: 0.36s; }
+.portada-in > :nth-child(n + 6) { animation-delay: 0.46s; }
+
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ----- Logo ----- */
+.logo-placa {
+  width: fit-content;
+  background: var(--papel);
+  padding: 1.1rem 1.6rem 1rem;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 12px 26px -14px rgb(43 23 17 / 0.6);
+  margin: 0 auto 2.25rem;
+  animation-name: bajar;
+}
+.logo-placa img {
+  display: block;
+  width: clamp(7.5rem, 34vw, 10rem);
+  height: auto;
+}
+@keyframes bajar {
+  from { transform: translateY(-100%); }
+  to { transform: none; }
+}
+
+/* ----- Iconos animados del fondo ----- */
+.flotantes {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  container-type: size;
+}
+/* Cada icono tiene tres movimientos, uno por capa:
+   .flota sube y gira · .mece va de lado a lado · el svg hace su gesto propio */
+.flota {
+  position: absolute;
+  top: 100%;
+  left: var(--x);
+  width: var(--s);
+  height: var(--s);
+  color: var(--papel);
+  opacity: var(--o, 0.26);
+  animation: subir var(--t) linear var(--d) infinite;
+}
+.flota.mostaza { color: var(--mostaza); }
+
+.mece {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: mecer var(--tm) ease-in-out var(--dg) infinite alternate;
+}
+.flota svg,
+.destello svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Sube desde abajo de la portada hasta salir por arriba */
+@keyframes subir {
+  from { transform: translateY(0) rotate(var(--r)); }
+  to { transform: translateY(calc(-100cqh - 150%)) rotate(calc(var(--r) * -1)); }
+}
+@keyframes mecer {
+  from { transform: translateX(calc(var(--m) * -1)); }
+  to { transform: translateX(var(--m)); }
+}
+
+/* ----- Gestos de cada icono ----- */
+.g-latir svg { animation: latir 1.5s ease-in-out var(--dg) infinite; }
+.g-brillar svg { animation: brillar 2.6s ease-in-out var(--dg) infinite; }
+.g-rebotar svg {
+  transform-origin: 50% 100%;
+  animation: rebotar 1.9s cubic-bezier(0.3, 0, 0.3, 1) var(--dg) infinite;
+}
+.g-menear svg {
+  transform-origin: 50% 85%;
+  animation: menear 1.7s ease-in-out var(--dg) infinite alternate;
+}
+.g-voltear svg { animation: voltear 4.2s ease-in-out var(--dg) infinite; }
+
+@keyframes latir {
+  0%, 60%, 100% { transform: scale(1); }
+  15% { transform: scale(1.3); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.2); }
+}
+@keyframes brillar {
+  0%, 100% { transform: scale(0.45) rotate(0deg); opacity: 0.35; }
+  50% { transform: scale(1.25) rotate(90deg); opacity: 1; }
+}
+@keyframes rebotar {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  35% { transform: translateY(-26%) scale(0.95, 1.06); }
+  60% { transform: translateY(0) scale(1.1, 0.88); }
+  78% { transform: translateY(-6%) scale(0.99, 1.02); }
+}
+@keyframes menear {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(14deg); }
+}
+@keyframes voltear {
+  0%, 28% { transform: rotateY(0deg); }
+  50% { transform: rotateY(180deg); }
+  72%, 100% { transform: rotateY(360deg); }
+}
+
+/* ----- Estrellitas que titilan en su lugar ----- */
+.destello {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  color: var(--mostaza);
+  animation: titilar var(--t) ease-in-out var(--d) infinite;
+}
+@keyframes titilar {
+  0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(90deg); opacity: 0.85; }
+}
+
+/* ----- Rayos que giran lentamente detrás del título ----- */
+.portada::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  width: 110rem;
+  height: 110rem;
+  left: calc(50% - 55rem);
+  top: calc(17rem - 55rem);
+  background: repeating-conic-gradient(rgb(255 250 241 / 0.07) 0deg 9deg, transparent 9deg 18deg);
+  -webkit-mask: radial-gradient(circle closest-side, #000 8%, transparent 78%);
+  mask: radial-gradient(circle closest-side, #000 8%, transparent 78%);
+  animation: girar-rayos 140s linear infinite;
+}
+@keyframes girar-rayos {
+  to { transform: rotate(360deg); }
+}
+
+/* En pantallas angostas, la mitad de los iconos para no saturar */
+@media (max-width: 639px) {
+  .flota:nth-child(even),
+  .destello:nth-child(even) { display: none; }
+  .flota { width: calc(var(--s) * 0.8); height: calc(var(--s) * 0.8); }
+}
+
+/* ----- Títulos ----- */
 .sobretitulo {
   display: inline-block;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--mostaza);
   border-block: 1px solid color-mix(in srgb, var(--mostaza) 60%, transparent);
-  padding: 0.45rem 0.25rem;
-  margin-bottom: 1.5rem;
+  padding: 0.5rem 0.25rem;
+  margin-bottom: 1.25rem;
 }
 
 h1 {
-  font-size: clamp(3.25rem, 15vw, 6.5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.5rem, 12.5vw, 5.75rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
   line-height: 0.95;
+}
+h1 span {
+  display: block;
+  font-size: 0.5em;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  /* compensa el espacio que deja el tracking a la derecha */
+  margin-right: -0.32em;
+  margin-bottom: 0.15em;
 }
 h1 em {
   display: block;
-  font-weight: 500;
+  font-style: normal;
   color: var(--mostaza);
 }
 
 .portada-sub {
-  font-size: 1.1875rem;
+  font-size: 1.0625rem;
   margin: 1.5rem auto 2.25rem;
   max-width: 28rem;
 }
 .portada-sub strong {
   display: block;
-  font-family: var(--titulos);
-  font-size: 1.625rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   line-height: 1.2;
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
 }
 
 /* ===== Boleto ===== */
 .boleto {
-  background: var(--papel);
   color: var(--tinta);
   border-radius: 14px;
   text-align: left;
@@ -129,86 +313,85 @@ h1 em {
 
 .boleto-datos {
   margin: 0;
+  background: var(--papel);
+  border-radius: 14px 14px 0 0;
   padding: 1.5rem 1.5rem 1.35rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.1rem 1.25rem;
+  /* Fecha y hora van lado a lado si caben; si no, una debajo de la otra */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem 2.25rem;
+  /* Muescas recortadas: dejan ver el fondo de la portada */
+  -webkit-mask: radial-gradient(12px at 12px 100%, #0000 97%, #000) -12px 0 / 100% 100% repeat-x;
+  mask: radial-gradient(12px at 12px 100%, #0000 97%, #000) -12px 0 / 100% 100% repeat-x;
 }
-.boleto-datos .ancho { grid-column: 1 / -1; }
+.boleto-datos .ancho { flex-basis: 100%; }
 
 .boleto dt {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--suave);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
 }
 .boleto dd {
   margin: 0;
-  font-family: var(--titulos);
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .enlace-mapa {
   display: inline-block;
-  font-family: var(--texto);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--rojo);
   margin-left: 0.4rem;
 }
 
 .boleto-talon {
-  position: relative;
+  background: var(--papel);
+  border-radius: 0 0 14px 14px;
   border-top: 2px dashed var(--linea);
   padding: 1.1rem 1.5rem 1.3rem;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem 0.75rem;
+  -webkit-mask: radial-gradient(12px at 12px 0, #0000 97%, #000) -12px 0 / 100% 100% repeat-x;
+  mask: radial-gradient(12px at 12px 0, #0000 97%, #000) -12px 0 / 100% 100% repeat-x;
 }
-/* Muescas del boleto */
-.boleto-talon::before,
-.boleto-talon::after {
-  content: "";
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--rojo);
-  top: -13px;
-}
-.boleto-talon::before { left: -12px; }
-.boleto-talon::after { right: -12px; }
 
 .talon-etiqueta {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--suave);
 }
 .talon-precio {
-  font-family: var(--titulos);
-  font-size: 2.25rem;
-  font-weight: 700;
+  font-size: 2.125rem;
+  font-weight: 800;
   line-height: 1;
   color: var(--rojo);
 }
-.talon-precio.largo { font-size: 1.5rem; line-height: 1.15; }
+.talon-precio.largo { font-size: 1.375rem; line-height: 1.15; }
 .talon-nota {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--suave);
   flex-basis: 100%;
 }
 
 @media (min-width: 640px) {
   .boleto { grid-template-columns: 1fr 13rem; }
-  .boleto-datos { padding: 1.75rem 2rem; }
+  .boleto-datos {
+    border-radius: 14px 0 0 14px;
+    padding: 1.75rem 2rem;
+    -webkit-mask: radial-gradient(12px at 100% 12px, #0000 97%, #000) 0 -12px / 100% 100% repeat-y;
+    mask: radial-gradient(12px at 100% 12px, #0000 97%, #000) 0 -12px / 100% 100% repeat-y;
+  }
   .boleto-talon {
+    border-radius: 0 14px 14px 0;
     border-top: 0;
     border-left: 2px dashed var(--linea);
     flex-direction: column;
@@ -217,12 +400,10 @@ h1 em {
     text-align: center;
     gap: 0.35rem;
     padding: 1.5rem 1.25rem;
+    -webkit-mask: radial-gradient(12px at 0 12px, #0000 97%, #000) 0 -12px / 100% 100% repeat-y;
+    mask: radial-gradient(12px at 0 12px, #0000 97%, #000) 0 -12px / 100% 100% repeat-y;
   }
-  .boleto-talon::before,
-  .boleto-talon::after { left: -13px; right: auto; }
-  .boleto-talon::before { top: -12px; }
-  .boleto-talon::after { top: auto; bottom: -12px; }
-  .talon-precio { font-size: 2.75rem; }
+  .talon-precio { font-size: 2.5rem; }
   .talon-nota { flex-basis: auto; }
 }
 
@@ -236,29 +417,29 @@ h1 em {
 }
 .cuenta div {
   min-width: 0;
-  padding: 0.7rem 0.25rem 0.55rem;
-  border: 1px solid rgb(255 250 241 / 0.35);
+  padding: 0.75rem 0.25rem 0.55rem;
+  border: 1px solid rgb(255 250 241 / 0.4);
   border-radius: 10px;
+  background: rgb(140 25 17 / 0.35);
 }
 .cuenta b {
   display: block;
-  font-family: var(--titulos);
-  font-size: 1.875rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .cuenta span {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 .cuenta-msg {
   margin-top: 2.25rem;
-  font-family: var(--titulos);
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.625rem;
+  font-weight: 800;
   color: var(--mostaza);
 }
 
@@ -283,14 +464,6 @@ h1 em {
 .boton:active { transform: scale(0.98); }
 .boton[disabled] { opacity: 0.6; cursor: progress; }
 
-.boton-claro {
-  margin-top: 2.25rem;
-  background: var(--mostaza);
-  border-color: var(--mostaza);
-  color: var(--tinta);
-}
-.boton-claro:hover { background: #ffc94f; border-color: #ffc94f; }
-
 .boton-linea {
   background: transparent;
   color: var(--rojo);
@@ -305,16 +478,16 @@ h1 em {
 }
 
 h2 {
-  font-size: clamp(1.75rem, 6vw, 2.25rem);
-  font-weight: 700;
+  font-size: clamp(1.5rem, 5.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
   margin-bottom: 1rem;
 }
 
 .causa-texto {
-  font-family: var(--titulos);
-  font-size: clamp(1.25rem, 4.5vw, 1.5rem);
+  font-size: clamp(1.0625rem, 4vw, 1.25rem);
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.6;
   border-left: 4px solid var(--rojo);
   padding-left: 1.1rem;
 }
@@ -343,14 +516,13 @@ h2 {
   border-radius: 50%;
   background: var(--tinta);
   color: var(--mostaza);
-  font-family: var(--titulos);
-  font-size: 1.375rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   display: grid;
   place-items: center;
 }
-.pasos h3 { font-size: 1.25rem; margin-bottom: 0.2rem; }
-.pasos p { color: var(--suave); }
+.pasos h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.3rem; }
+.pasos p { color: var(--suave); font-size: 0.9375rem; }
 
 @media (min-width: 640px) {
   .pasos { grid-template-columns: repeat(3, 1fr); gap: 1.75rem; }
@@ -387,7 +559,7 @@ input[type="number"] {
   background: #fff;
   color: var(--tinta);
   font: inherit;
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
 }
 input:focus-visible {
   outline: none;
@@ -418,9 +590,8 @@ input:focus-visible {
 .contador button:hover { border-color: var(--rojo); color: var(--rojo); }
 .contador input {
   text-align: center;
-  font-family: var(--titulos);
-  font-weight: 700;
-  font-size: 1.375rem;
+  font-weight: 800;
+  font-size: 1.25rem;
   padding-inline: 0.25rem;
   appearance: textfield;
   -moz-appearance: textfield;
@@ -453,7 +624,7 @@ input:focus-visible {
   animation: aparecer 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 .gracias h2 { overflow-wrap: anywhere; }
-#gracias-detalle { font-size: 1.125rem; margin-bottom: 0.75rem; }
+#gracias-detalle { font-size: 1.0625rem; font-weight: 500; margin-bottom: 0.75rem; }
 
 @keyframes aparecer {
   from { transform: scale(0.4); opacity: 0; }
@@ -462,13 +633,12 @@ input:focus-visible {
 
 /* ===== Avance de boletos ===== */
 .avance-cifra {
-  font-family: var(--titulos);
-  font-size: 1.375rem;
+  font-size: 1.1875rem;
   font-weight: 500;
 }
 .avance-cifra b {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 2.375rem;
+  font-weight: 800;
   line-height: 1;
   color: var(--rojo);
   font-variant-numeric: tabular-nums;
@@ -491,6 +661,7 @@ input:focus-visible {
 .avance-texto {
   margin-top: 0.5rem;
   color: var(--suave);
+  font-size: 0.9375rem;
 }
 
 /* ===== Compartir y pie ===== */
@@ -510,15 +681,21 @@ input:focus-visible {
   border-top: 1px solid var(--linea);
   text-align: center;
   color: var(--suave);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 .pie-legal {
   max-width: 34rem;
   margin: 0.6rem auto 0;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
 }
 
+/* Si el dispositivo pide menos movimiento (en Windows: "Efectos de animación"
+   desactivados), se quitan el desplazamiento suave, la entrada del contenido y
+   las transiciones. Los iconos del fondo se mantienen animados a propósito:
+   son pequeños, tenues y lentos. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .portada-in > *,
+  .gracias-marca { animation: none; }
+  *, *::before, *::after { transition: none !important; }
 }

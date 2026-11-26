@@ -7,16 +7,17 @@ const CONFIG = {
     "Nos reunimos para apoyar con los gastos médicos de Jimmy Marroquin. Cada boleto que compras es una ayuda directa para su tratamiento. Gracias por acompañarnos.",
 
   fechaTexto: "Sábado 19 de diciembre",
-  horaTexto: "", // ej. "5:00 a 8:00 p. m." — vacío = no se muestra la hora
+  //   = espacio que no se parte en dos líneas. Vacío = no se muestra la hora.
+  horaTexto: "11 a. m. a 8 p. m.",
   // Para la cuenta regresiva (año-mes-día T hora:minutos, formato 24 h)
-  inicio: "2026-12-19T00:00",
-  fin: "2026-12-19T23:59",
+  inicio: "2026-12-19T11:00",
+  fin: "2026-12-19T20:00",
 
   lugar: "Wendy's City Mall, Tegucigalpa",
   mapaUrl: "https://www.google.com/maps/search/?api=1&query=Wendy%27s+City+Mall+Tegucigalpa", // enlace de Google Maps (opcional)
 
   precioBoleto: "L 260", //   = espacio que no se parte en dos líneas
-  incluye: "Incluye un combo clásico",
+  incluye: "Incluye un combo Dave's Classic",
   comoPagar:
     "Paga y recoge tu boleto en la sucursal, Wendy's City Mall. De preferencia en efectivo.",
 
@@ -53,6 +54,81 @@ document
   .classList.toggle("largo", CONFIG.precioBoleto.length > 7);
 
 if (!CONFIG.endpoint) $("aviso-demo").hidden = false;
+
+/* ---------- Iconos animados de la portada ---------- */
+(function iconosFlotantes() {
+  const capa = $("flotantes");
+  const CANTIDAD = 26; // iconos que suben flotando
+  const DESTELLOS = 18; // estrellitas que titilan en su lugar
+
+  // Cada icono sube flotando y además hace su propio gesto:
+  // rebotar, latir, menearse, brillar o voltearse.
+  const tipos = [
+    { icono: "hamburguesa", gesto: "rebotar", tam: [40, 62] },
+    { icono: "corazon", gesto: "latir", tam: [20, 34], mostaza: true },
+    { icono: "papas", gesto: "menear", tam: [36, 54] },
+    { icono: "estrella", gesto: "brillar", tam: [16, 26], mostaza: true },
+    { icono: "vaso", gesto: "menear", tam: [34, 48] },
+    { icono: "boleto", gesto: "voltear", tam: [38, 54] },
+    { icono: "globo", gesto: "menear", tam: [34, 50] },
+    { icono: "corazon", gesto: "latir", tam: [18, 30], mostaza: true },
+    { icono: "helado", gesto: "rebotar", tam: [34, 48] },
+    { icono: "estrella", gesto: "brillar", tam: [14, 22], mostaza: true },
+    { icono: "cubiertos", gesto: "menear", tam: [30, 44] },
+  ];
+
+  // Azar con semilla fija: la distribución se ve natural pero siempre es la misma.
+  let semilla = 20261219;
+  const azar = () => {
+    semilla = (semilla + 0x6d2b79f5) | 0;
+    let t = Math.imul(semilla ^ (semilla >>> 15), 1 | semilla);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const entre = (min, max) => min + azar() * (max - min);
+
+  const SVG = "http://www.w3.org/2000/svg";
+  const dibujo = (icono) => {
+    const svg = document.createElementNS(SVG, "svg");
+    const use = document.createElementNS(SVG, "use");
+    use.setAttribute("href", "#i-" + icono);
+    svg.append(use);
+    return svg;
+  };
+
+  for (let i = 0; i < CANTIDAD; i++) {
+    const tipo = tipos[i % tipos.length];
+    const tam = Math.round(entre(tipo.tam[0], tipo.tam[1]));
+    const seg = entre(17, 34);
+    // i * 7 reparte los tipos por todo el ancho en vez de ordenarlos de izquierda a derecha
+    const x = (((i * 7) % CANTIDAD) + 0.5) / CANTIDAD * 96 + entre(-1.5, 1.5);
+    // Los grandes se ven más tenues, como si estuvieran más lejos
+    const opacidad = tipo.mostaza ? entre(0.5, 0.7) : entre(0.2, 0.34);
+
+    const pieza = document.createElement("span");
+    pieza.className = `flota g-${tipo.gesto}` + (tipo.mostaza ? " mostaza" : "");
+    pieza.style.cssText =
+      `--x:${x.toFixed(1)}%;--s:${tam}px;--o:${opacidad.toFixed(2)};` +
+      `--t:${seg.toFixed(1)}s;--d:${(-azar() * seg).toFixed(1)}s;--r:${entre(-18, 18).toFixed(0)}deg;` +
+      `--m:${entre(10, 26).toFixed(0)}px;--tm:${entre(3.5, 6.5).toFixed(1)}s;--dg:${(-azar() * 4).toFixed(1)}s`;
+
+    const mece = document.createElement("span");
+    mece.className = "mece";
+    mece.append(dibujo(tipo.icono));
+    pieza.append(mece);
+    capa.append(pieza);
+  }
+
+  for (let i = 0; i < DESTELLOS; i++) {
+    const destello = document.createElement("span");
+    destello.className = "destello";
+    destello.style.cssText =
+      `--x:${entre(2, 97).toFixed(1)}%;--y:${entre(3, 95).toFixed(1)}%;--s:${entre(8, 17).toFixed(0)}px;` +
+      `--t:${entre(2.2, 4.6).toFixed(1)}s;--d:${(-azar() * 4).toFixed(1)}s`;
+    destello.append(dibujo("estrella"));
+    capa.append(destello);
+  }
+})();
 
 /* ---------- Cuenta regresiva ---------- */
 (function cuentaRegresiva() {
