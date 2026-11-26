@@ -19,7 +19,7 @@ const CONFIG = {
   precioBoleto: "L 260", //   = espacio que no se parte en dos líneas
   incluye: "Incluye un combo Dave's Classic",
   comoPagar:
-    "Paga y recoge tu boleto en la sucursal, Wendy's City Mall. De preferencia en efectivo.",
+    "Paga y recoge tu boleto el día de la Noche Benéfica, sábado 19 de diciembre, en Wendy's City Mall Tegucigalpa. De preferencia en efectivo.",
 
   totalBoletos: 250, // boletos disponibles, para la barra de avance (0 = sin barra)
 
