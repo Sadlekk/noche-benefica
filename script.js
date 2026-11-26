@@ -33,6 +33,13 @@ const CONFIG = {
 const $ = (id) => document.getElementById(id);
 const CLAVE_LOCAL = "noche-benefica-registros";
 
+/* ---------- Abrir siempre desde arriba ----------
+   Al recargar, el navegador regresa a donde uno se había quedado (por ejemplo,
+   abajo en el formulario). Aquí se le pide que no lo haga, para que la
+   invitación siempre se lea desde el inicio. */
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
 /* ---------- Textos del evento ---------- */
 document.querySelectorAll("[data-cfg]").forEach((el) => {
   el.textContent = CONFIG[el.dataset.cfg] ?? "";
